@@ -1,0 +1,28 @@
+# Construction et publication de l'image mongo-express du registre TropEvent.
+#
+# Cette image etait jusqu'ici construite et poussee a la main, donc en amd64
+# uniquement : les postes Mac Apple Silicon echouaient avec
+# "no matching manifest for linux/arm64/v8". Les deux plateformes sont declarees
+# ici pour y remedier.
+#
+#   docker login tropevent.registry.trop.ovh
+#   docker buildx create --name tropevent --driver docker-container --use   # une fois par machine
+#   docker compose -f docker-compose.build.yml build --push
+#
+# Le multi-plateforme impose --push : le resultat ne peut pas etre charge dans le
+# stock local, rien de nouveau n'apparait donc dans "docker images".
+#
+# Verification, dans le registre et non en local :
+#   docker buildx imagetools inspect tropevent.registry.trop.ovh/mongo-express:<tag>
+# Doit montrer un index avec deux entrees linux/amd64 et linux/arm64.
+
+services:
+ mongoexpress:
+  # Le tag suit la version de package.json. Surchargeable sans editer ce fichier :
+  #   MONGO_EXPRESS_TAG=1.2.0-w3blogfr docker compose -f docker-compose.build.yml build --push
+  image: tropevent.registry.trop.ovh/mongo-express:${MONGO_EXPRESS_TAG:-1.1.0-rc-4-w3blogfr}
+  build:
+   context: .
+   platforms:
+    - linux/amd64
+    - linux/arm64

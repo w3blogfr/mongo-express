@@ -1,4 +1,4 @@
-FROM node:24-alpine3.24 AS build
+FROM --platform=$BUILDPLATFORM node:24-alpine3.24 AS build
 
 # Build argument for enabling OIDC support
 ARG ENABLE_OIDC=false
